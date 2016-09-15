@@ -1,4 +1,10 @@
-<link rel="import" href="../polymer/polymer.html">
+<!--<link rel="import" href="../polymer/polymer.html">-->
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+
 
 <!--
 `firebase-data-import`
@@ -14,7 +20,61 @@ import data from a .json file to firebase
         display: block;
       }
     </style>
-    <h2>Hello [[prop1]]</h2>
+
+    <firebase-app auth-domain="polymerfire-test.firebaseapp.com"
+      database-url="https://polymerfire-test.firebaseio.com/"
+      api-key="AIzaSyDTP-eiQezleFsV2WddFBAhF_WEzx_8v_g">
+    </firebase-app>
+    <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError">
+    </firebase-auth>
+
+    <h2>Hello</h2>
+
+    <iron-pages selected="{{selected}}" id="iron-pages-import">
+      <div>
+          <h2>1. Select Firebase DataBase</h2>
+          <paper-input  id="DBConn" value="{{location}}"
+          error-message="needs some text" required auto-validate>{{location}}</paper-input>  
+      </div>
+      <div>
+          <h2>2. Databse Authentication</h2>
+          <paper-input label="Email"  id="user" value="{{user}}"
+          error-message="needs some text" required auto-validate></paper-input>
+          <paper-input label="Password"  id="password" value="{{password}}"
+          error-message="needs some text" required auto-validate></paper-input>
+          <!--<paper-input label="login error" id="loginError"></paper-input>-->
+          <paper-input-container id="loginError">
+          <!--<label>Login error</label>-->
+          <input is="iron-input">
+          </paper-input-container>
+          
+          
+      </div>
+      <div>
+          <h2>3. Select JSON file to upload into database</h2>
+          <paper-input type="file" label="file" id="file"></paper-input>
+    </div>
+    <div>
+       <h2>4. Select in which branch of Firebase to upload</h2>
+           <paper-dropdown-menu label="Branches">
+              <paper-menu class="dropdown-content" id="branchesMenu" selected="{{chosenBranch}}" attr-for-selected="name">
+                    <template is="dom-repeat" items="{{branches}}" as="branch">
+                        <paper-item name="[[branch.name]]">[[branch.name]]</paper-item>
+                    </template>
+                </paper-menu>
+        </paper-dropdown-menu>
+       </div>
+       <div>
+          <h2>5. Result</h2>
+          <div>Import completed!</div>
+      </div>  
+    </iron-pages>
+    <paper-button on-tap="prevPage" disabled$="{{_computeHiddenPrev(selected)}}">PREV</paper-button>
+    <paper-button on-tap="nextPage" disabled$="{{_computeHiddenNext(selected)}}">NEXT</paper-button>
+
+
+
+
   </template>
 
   <script>
@@ -23,12 +83,11 @@ import data from a .json file to firebase
       is: 'firebase-data-import',
 
       properties: {
-        prop1: {
-          type: String,
-          value: 'firebase-data-import',
+            authDomanin:{type:String},
+            databaseUrl:{type:String},  
+            apiKey:{type:String},
+            user:{type:Object}
         },
-      },
-
     });
   </script>
 </dom-module>
