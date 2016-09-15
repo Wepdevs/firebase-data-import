@@ -1,0 +1,50 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+`firebase-data-import`
+import data from a .json file to firebase
+
+@demo demo/index.html 
+-->
+
+<dom-module id="firebase-data-import">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Hello [[prop1]]</h2>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'firebase-data-import',
+
+      properties: {
+        prop1: {
+          type: String,
+          value: 'firebase-data-import',
+        },
+      },
+
+    });
+  </script>
+</dom-module>
+
+
+
+
+<!--<script src="https://www.gstatic.com/firebasejs/3.3.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  // TODO: Replace with your project's customized code snippet
+  var config = {
+    apiKey: "<API_KEY>",
+    authDomain: "<PROJECT_ID>.firebaseapp.com",
+    databaseURL: "https://<DATABASE_NAME>.firebaseio.com",
+    storageBucket: "<BUCKET>.appspot.com",
+  };
+  firebase.initializeApp(config);
+</script>-->
