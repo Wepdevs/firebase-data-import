@@ -86,8 +86,89 @@ import data from a .json file to firebase
             authDomanin:{type:String},
             databaseUrl:{type:String},  
             apiKey:{type:String},
-            user:{type:Object}
+            user:{type:Object},
+            selected: {type: Number,value: 0},
         },
+
+      nextPage: function(){
+            var pages = document.querySelector('#iron-pages-import');
+            var errorText = document.querySelector('#loginError input');
+
+            switch(this.selected){
+                case 0: 
+                    if(this.$.DBConn.validate())
+                    this.ref = new Firebase(this.location);
+                        pages.selectNext();
+                    break;
+                case 1:
+                    if(this.$.user.validate() && this.$.password.validate()){
+                        this.ref.authWithPassword({
+                        email    : this.user,
+                        password : this.password
+                        }, function(error, authData) {
+                            if (error) {
+                                switch (error.code) {
+                                case "INVALID_EMAIL":
+                                    //console.log("The specified user account email is invalid.");
+                                    errorText.value = "The specified user account email is invalid.";
+                                    break;
+                                case "INVALID_PASSWORD":
+                                    //console.log("The specified user account password is incorrect.");
+                                    errorText.value = "The specified user account password is incorrect."
+                                    break;
+                                case "INVALID_USER":
+                                    //console.log("The specified user account does not exist.");
+                                    errorText.value = "The specified user account does not exist."
+                                    break;
+                                default:
+                                    //console.log("Error logging user in:", error);
+                                    loginError = "Error logging user in";
+                                }
+                            } else {
+                                console.log("Authenticated successfully!");
+                                pages.selectNext();
+                            }
+                        });
+                        
+                        this.$.file.addEventListener('change', this.saveFile);
+                        
+                        this.getBranches(this.ref);
+                    } 
+                    break;
+                case 2:
+                    if(this.validateFile()){
+                        pages.selectNext();
+                    }   
+                    else{
+                        alert('Upload a file!');
+                    }
+                    break;
+                case 3:
+                    this.importData();
+                    pages.selectNext();
+                    break;
+                    default:
+                        pages.selectNext();
+            }
+        },
+        
+        prevPage: function(){
+            var pages = document.querySelector('#iron-pages-import');
+            alert('asd');
+            switch(this.selected){
+                case 0: 
+                    break;
+                default:
+                    pages.selectPrevious();
+            }   
+        },
+
+        _computeHiddenNext: function(){
+            return this.selected == 4;
+        },
+        _computeHiddenPrev: function(){
+            return this.selected == 0;
+        }
     });
   </script>
 </dom-module>
