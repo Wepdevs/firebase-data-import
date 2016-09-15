@@ -21,26 +21,32 @@ import data from a .json file to firebase
       }
     </style>
 
-    <firebase-app auth-domain="polymerfire-test.firebaseapp.com"
-      database-url="https://polymerfire-test.firebaseio.com/"
-      api-key="AIzaSyDTP-eiQezleFsV2WddFBAhF_WEzx_8v_g">
+    <firebase-app 
+      name="app"    
+      api-key="[[apiKey]]"
+      auth-domain="[[authDomain]]"
+      database-url="[[databaseUrl]]"
+      app="{{app}}">
     </firebase-app>
-    <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError">
+    <firebase-auth id="auth" app-name="app" user="{{user}}" provider="google" on-error="handleError">
     </firebase-auth>
-
-    <h2>Hello</h2>
+    <firebase-query
+      name="app"
+      id="query"
+      data="{{data}}">
+    </firebase-query>
 
     <iron-pages selected="{{selected}}" id="iron-pages-import">
       <div>
           <h2>1. Select Firebase DataBase</h2>
-          <paper-input  id="DBConn" value="{{location}}"
-          error-message="needs some text" required auto-validate>{{location}}</paper-input>  
+          <paper-input  id="DBConn" value="{{databaseUrl}}"
+          error-message="needs some text" required auto-validate>{{databaseUrl}}</paper-input>  
       </div>
       <div>
           <h2>2. Databse Authentication</h2>
-          <paper-input label="Email"  id="user" value="{{user}}"
+          <paper-input label="Email"  id="email" value="{{email}}"
           error-message="needs some text" required auto-validate></paper-input>
-          <paper-input label="Password"  id="password" value="{{password}}"
+          <paper-input type="password" label="Password"  id="password" value="{{password}}"
           error-message="needs some text" required auto-validate></paper-input>
           <!--<paper-input label="login error" id="loginError"></paper-input>-->
           <paper-input-container id="loginError">
@@ -73,7 +79,14 @@ import data from a .json file to firebase
     <paper-button on-tap="nextPage" disabled$="{{_computeHiddenNext(selected)}}">NEXT</paper-button>
 
 
+    <h3>Config</h3>
+    <div>auth Domain: [[authDomain]]</div>
+    <div>database Url: [[databaseUrl]]</div>
+    <div>api Key: [[apiKey]]</div>
+    <div>user email: [[user.email]]</div>
 
+    <div on-tap="tap">tap</div>
+    
 
   </template>
 
@@ -88,6 +101,17 @@ import data from a .json file to firebase
             apiKey:{type:String},
             user:{type:Object},
             selected: {type: Number,value: 0},
+            app:{type:Object},
+            data:{type:Object},
+            email:{type:String, value: "walter.miani@gmail.com"},
+            password:{type:String, value: "walter.miani@gmail.com"}
+        },
+
+        tap:function(){
+          console.log(this.data);
+
+
+          this.$.query.save({name:"asd"});
         },
 
       nextPage: function(){
@@ -97,42 +121,15 @@ import data from a .json file to firebase
             switch(this.selected){
                 case 0: 
                     if(this.$.DBConn.validate())
-                    this.ref = new Firebase(this.location);
                         pages.selectNext();
                     break;
                 case 1:
-                    if(this.$.user.validate() && this.$.password.validate()){
-                        this.ref.authWithPassword({
-                        email    : this.user,
-                        password : this.password
-                        }, function(error, authData) {
-                            if (error) {
-                                switch (error.code) {
-                                case "INVALID_EMAIL":
-                                    //console.log("The specified user account email is invalid.");
-                                    errorText.value = "The specified user account email is invalid.";
-                                    break;
-                                case "INVALID_PASSWORD":
-                                    //console.log("The specified user account password is incorrect.");
-                                    errorText.value = "The specified user account password is incorrect."
-                                    break;
-                                case "INVALID_USER":
-                                    //console.log("The specified user account does not exist.");
-                                    errorText.value = "The specified user account does not exist."
-                                    break;
-                                default:
-                                    //console.log("Error logging user in:", error);
-                                    loginError = "Error logging user in";
-                                }
-                            } else {
-                                console.log("Authenticated successfully!");
-                                pages.selectNext();
-                            }
-                        });
+                    if(this.$.email.validate() && this.$.password.validate()){
+                        this.$.auth.signInWithEmailAndPassword(this.$.email.value, this.$.password.value);
                         
                         this.$.file.addEventListener('change', this.saveFile);
                         
-                        this.getBranches(this.ref);
+                        //this.getBranches(this.$.firebase);
                     } 
                     break;
                 case 2:
@@ -147,14 +144,13 @@ import data from a .json file to firebase
                     this.importData();
                     pages.selectNext();
                     break;
-                    default:
-                        pages.selectNext();
+                default:
+                    pages.selectNext();
             }
         },
         
         prevPage: function(){
             var pages = document.querySelector('#iron-pages-import');
-            alert('asd');
             switch(this.selected){
                 case 0: 
                     break;
@@ -168,6 +164,27 @@ import data from a .json file to firebase
         },
         _computeHiddenPrev: function(){
             return this.selected == 0;
+        },
+
+        getBranches: function(ref){
+            
+            var branches = [];
+            
+            ref.once("value", function (snapshot) {
+                
+                snapshot.forEach(function (childsnapshot) {
+                    
+                    var key = childsnapshot.key();
+                    branches.push({name: key});
+                });
+                
+               for(var i = 0; i < branches.length; i++){
+                   this.branches.push({name: branches[i].name});
+               }
+               
+               this.notifyPath('branches', this.branches.slice());
+               
+            }, this);
         }
     });
   </script>
