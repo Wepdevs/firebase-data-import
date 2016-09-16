@@ -22,6 +22,7 @@ import data from a .json file to firebase
     </style>
 
     <firebase-app 
+      id="firebase"
       name="app"    
       api-key="[[apiKey]]"
       auth-domain="[[authDomain]]"
@@ -31,8 +32,9 @@ import data from a .json file to firebase
     <firebase-auth id="auth" app-name="app" user="{{user}}" provider="google" on-error="handleError">
     </firebase-auth>
     <firebase-query
-      name="app"
+      app-name="app"
       id="query"
+      path="prova"
       data="{{data}}">
     </firebase-query>
 
@@ -53,8 +55,6 @@ import data from a .json file to firebase
           <!--<label>Login error</label>-->
           <input is="iron-input">
           </paper-input-container>
-          
-          
       </div>
       <div>
           <h2>3. Select JSON file to upload into database</h2>
@@ -85,6 +85,11 @@ import data from a .json file to firebase
     <div>api Key: [[apiKey]]</div>
     <div>user email: [[user.email]]</div>
 
+
+    <!--<template is="dom-repeat" items="{{data}}">
+      <div>elemento:  [[item.nome]]</div>
+    </template>
+    -->
     <div on-tap="tap">tap</div>
     
 
@@ -96,22 +101,21 @@ import data from a .json file to firebase
       is: 'firebase-data-import',
 
       properties: {
-            authDomanin:{type:String},
-            databaseUrl:{type:String},  
-            apiKey:{type:String},
-            user:{type:Object},
+            authDomanin:String,
+            databaseUrl:String,  
+            apiKey:String,
+            user:Object,
             selected: {type: Number,value: 0},
-            app:{type:Object},
-            data:{type:Object},
+            app:Object,
+            data:Object,
             email:{type:String, value: "walter.miani@gmail.com"},
-            password:{type:String, value: "walter.miani@gmail.com"}
+            password:{type:String, value: "walter.miani@gmail.com"},
+            file:Object,
         },
 
         tap:function(){
-          console.log(this.data);
-
-
-          this.$.query.save({name:"asd"});
+          // this.$.firebase.app.database().ref().child('try').push({nome:"asd"});
+          console.log(this.file);
         },
 
       nextPage: function(){
@@ -129,7 +133,9 @@ import data from a .json file to firebase
                         
                         this.$.file.addEventListener('change', this.saveFile);
                         
-                        //this.getBranches(this.$.firebase);
+                        var ref = this.$.firebase.app.database().ref();
+                        this.getBranches(ref);
+                        pages.selectNext();
                     } 
                     break;
                 case 2:
@@ -167,25 +173,34 @@ import data from a .json file to firebase
         },
 
         getBranches: function(ref){
-            
+          
             var branches = [];
             
-            ref.once("value", function (snapshot) {
-                
-                snapshot.forEach(function (childsnapshot) {
-                    
-                    var key = childsnapshot.key();
-                    branches.push({name: key});
-                });
-                
-               for(var i = 0; i < branches.length; i++){
-                   this.branches.push({name: branches[i].name});
-               }
-               
-               this.notifyPath('branches', this.branches.slice());
-               
-            }, this);
+            ref.once('value').then(function(snapshot){
+
+              snapshot.forEach(function(childsnapshot){
+                  branches.push({name: childsnapshot.key});
+              });
+
+            });
+
+         },
+
+          validateFile: function(){
+
+            console.log(this.$.file);
+
+            return (this.$.file.file);  
+        },
+
+        saveFile: function(e){
+            
+            console.log('salvo il file');
+            this.file = e.target.files[0];
+            event.stopPropagation();
+            event.preventDefault();
         }
+        
     });
   </script>
 </dom-module>
