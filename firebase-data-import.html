@@ -4,6 +4,8 @@
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
 
 
 <!--
@@ -65,7 +67,7 @@ import data from a .json file to firebase
            <paper-dropdown-menu label="Branches">
               <paper-menu class="dropdown-content" id="branchesMenu" selected="{{chosenBranch}}" attr-for-selected="name">
                     <template is="dom-repeat" items="{{branches}}" as="branch">
-                        <paper-item name="[[branch.name]]">[[branch.name]]</paper-item>
+                        <paper-item name="[[branch]]">[[branch]]</paper-item>
                     </template>
                 </paper-menu>
         </paper-dropdown-menu>
@@ -111,11 +113,12 @@ import data from a .json file to firebase
             email:{type:String, value: "walter.miani@gmail.com"},
             password:{type:String, value: "walter.miani@gmail.com"},
             file:Object,
+            branches: {type: Array,value: ['primo','secondo']},
         },
 
         tap:function(){
           // this.$.firebase.app.database().ref().child('try').push({nome:"asd"});
-          console.log(this.file);
+          console.log(this.branches);
         },
 
       nextPage: function(){
@@ -140,6 +143,8 @@ import data from a .json file to firebase
                     break;
                 case 2:
                     if(this.validateFile()){
+
+                        this.file = this.$.file.file;                       
                         pages.selectNext();
                     }   
                     else{
@@ -179,23 +184,21 @@ import data from a .json file to firebase
             ref.once('value').then(function(snapshot){
 
               snapshot.forEach(function(childsnapshot){
-                  branches.push({name: childsnapshot.key});
-              });
+                  this.branches.push(childsnapshot.key);
+                  this.notifyPath('branches', this.branches.slice());
+              }.bind(this));
 
-            });
+            }.bind(this));
 
          },
 
           validateFile: function(){
-
-            console.log(this.$.file);
 
             return (this.$.file.file);  
         },
 
         saveFile: function(e){
             
-            console.log('salvo il file');
             this.file = e.target.files[0];
             event.stopPropagation();
             event.preventDefault();
