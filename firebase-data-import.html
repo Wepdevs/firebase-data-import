@@ -81,17 +81,11 @@ import data from a .json file to firebase
     <paper-button on-tap="nextPage" disabled$="{{_computeHiddenNext(selected)}}">NEXT</paper-button>
 
 
-    <h3>Config</h3>
+    <!--<h3>Config</h3>
     <div>auth Domain: [[authDomain]]</div>
     <div>database Url: [[databaseUrl]]</div>
     <div>api Key: [[apiKey]]</div>
-    <div>user email: [[user.email]]</div>
-
-
-    <!--<template is="dom-repeat" items="{{data}}">
-      <div>elemento:  [[item.nome]]</div>
-    </template>
-    -->
+    <div>user email: [[user.email]]</div>-->
     <div on-tap="tap">tap</div>
     
 
@@ -113,7 +107,8 @@ import data from a .json file to firebase
             email:{type:String, value: "walter.miani@gmail.com"},
             password:{type:String, value: "walter.miani@gmail.com"},
             file:Object,
-            branches: {type: Array,value: ['primo','secondo']},
+            branches: {type: Array,value: ['root']},
+            chosenBranch: String
         },
 
         tap:function(){
@@ -202,6 +197,45 @@ import data from a .json file to firebase
             this.file = e.target.files[0];
             event.stopPropagation();
             event.preventDefault();
+        },
+
+        importData: function(){
+             
+             
+            // this.file = this.$.file.file;
+             var reader = new FileReader();
+            
+            if(this.file){
+                    
+                    reader.onload = function(e){
+                    var output = e.target.result;
+                    var json = JSON.parse(output);
+                    var entries = [];
+                    var ref = this.$.firebase.app.database().ref();
+                    var branchRef = ref.child(this.chosenBranch); 
+                    console.log('importing data into ' + this.chosenBranch);
+                    branchRef.once('value').then(function(snapshot){
+                        snapshot.forEach(function(childSnap){
+                            var key = childSnap.key;
+                            if(!isNaN(key))
+                                entries.push({id: key});
+                        });
+
+                        var max = 0;
+                          for(var i = 0; i < entries.length; i++){
+                                      if(entries[i].id > max)
+                                      max = entries[i].id;
+                          }
+                          
+                          var newId = Number(max) + Number(1);
+                          for (var index in json) {
+                              branchRef.child(newId).set(json[index]);
+                              newId = Number(newId) + Number(1);
+                          }
+                    }.bind(this));
+              }.bind(this);
+              reader.readAsText(this.file);  
+            }
         }
         
     });
