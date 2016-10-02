@@ -1,0 +1,17 @@
+[{
+           name:"home",
+           view:"home-view"
+         },{
+           name:"projects",
+           view:"projects-view"
+         },{
+           name:"team",
+           view:"people-page"
+         },{
+           name:"blog",
+           class:"bordered",
+           view:"blog-view"
+         }, {
+           name: "credits",
+           view:"credits-view"
+         }]

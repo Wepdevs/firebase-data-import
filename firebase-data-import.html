@@ -86,9 +86,6 @@ import data from a .json file to firebase
     <div>database Url: [[databaseUrl]]</div>
     <div>api Key: [[apiKey]]</div>
     <div>user email: [[user.email]]</div>-->
-    <div on-tap="tap">tap</div>
-    
-
   </template>
 
   <script>
@@ -109,11 +106,6 @@ import data from a .json file to firebase
             file:Object,
             branches: {type: Array,value: ['root']},
             chosenBranch: String
-        },
-
-        tap:function(){
-          // this.$.firebase.app.database().ref().child('try').push({nome:"asd"});
-          console.log(this.branches);
         },
 
       nextPage: function(){
@@ -181,6 +173,13 @@ import data from a .json file to firebase
               snapshot.forEach(function(childsnapshot){
                   this.branches.push(childsnapshot.key);
                   this.notifyPath('branches', this.branches.slice());
+                  // second level branches (just repeat the process for deeper levels)
+                  childsnapshot.forEach(function(grandchildsnapshot){
+                  this.branches.push(childsnapshot.key + '/' + grandchildsnapshot.key);
+                  this.notifyPath('branches', this.branches.slice());
+                  }.bind(this));
+                  
+
               }.bind(this));
 
             }.bind(this));
@@ -200,9 +199,7 @@ import data from a .json file to firebase
         },
 
         importData: function(){
-             
-             
-            // this.file = this.$.file.file;
+            
              var reader = new FileReader();
             
             if(this.file){
@@ -212,6 +209,8 @@ import data from a .json file to firebase
                     var json = JSON.parse(output);
                     var entries = [];
                     var ref = this.$.firebase.app.database().ref();
+                    if(this.chosenBranch == "root")
+                        this.chosenBranch = "/";
                     var branchRef = ref.child(this.chosenBranch); 
                     console.log('importing data into ' + this.chosenBranch);
                     branchRef.once('value').then(function(snapshot){
@@ -241,19 +240,3 @@ import data from a .json file to firebase
     });
   </script>
 </dom-module>
-
-
-
-
-<!--<script src="https://www.gstatic.com/firebasejs/3.3.0/firebase.js"></script>
-<script>
-  // Initialize Firebase
-  // TODO: Replace with your project's customized code snippet
-  var config = {
-    apiKey: "<API_KEY>",
-    authDomain: "<PROJECT_ID>.firebaseapp.com",
-    databaseURL: "https://<DATABASE_NAME>.firebaseio.com",
-    storageBucket: "<BUCKET>.appspot.com",
-  };
-  firebase.initializeApp(config);
-</script>-->
